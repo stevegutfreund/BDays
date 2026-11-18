@@ -1,0 +1,19 @@
+{% import "_macros.html" as ui %}
+{# One upcoming occurrence. Expects `row` (enriched entry + occ); `show_family` optional. #}
+{% set occ = row.occ %}
+{% set d = occ.date.split('-') %}
+<li class="agenda-item{{ ' is-today' if occ.days == 0 }}{{ ' is-soon' if 0 < occ.days <= 7 }}">
+  <span class="agenda-date">
+    <span class="agenda-month">{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d[1]|int - 1] }}</span>
+    <span class="agenda-day">{{ d[2]|int }}</span>
+  </span>
+  <span class="agenda-main">
+    <span class="agenda-name">{{ row.name }}</span>
+    <span class="agenda-meta">
+      {% if row.type == 'wedding anniversary' %}{{ occ.years }} years married{% elif row.type == 'event' %}{{ occ.years }} years{% else %}Turns {{ occ.years }}{% endif %}
+      · <span class="cal-tag cal-{{ occ.kind }}">{{ 'Hebrew' if occ.kind == 'heb' else 'Gregorian' }}</span>
+      {% if row.family is defined and row.family and show_family is not false %}· {{ row.family|capitalize }}{% endif %}
+    </span>
+  </span>
+  <span class="agenda-when">{{ occ.relative }}</span>
+</li>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}Families – BDays{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Families</h1>
+    <p class="page-sub">{{ families|length }} famil{{ 'y' if families|length == 1 else 'ies' }} · {{ total }} entries</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="{{ url_for('families.add_family') }}">{{ ui.icon('plus') }}New family</a>
+  </div>
+</div>
+
+{% if families %}
+<div class="layout-split">
+  <section class="panel">
+    <header class="panel-head">
+      <h2>All families</h2>
+    </header>
+    <div class="family-list">
+      {% for family in families %}
+      {% set info = by_family[family] %}
+      {% set cfg = cal_cfg.get(family) %}
+      <a class="family-row" href="{{ url_for('entries.list_entries', family=family) }}">
+        <span class="family-mark" style="--mark: {{ ui.color_hex(cfg.color) if cfg and cfg.color else '#64748b' }}">{{ family[0]|upper }}</span>
+        <span class="family-main">
+          <span class="family-name">{{ family|capitalize }}</span>
+          {% set st = info.stats %}
+          {% set parts = [
+               (st.birthdays ~ ' birthday' ~ ('' if st.birthdays == 1 else 's')) if st.birthdays else '',
+               (st.anniversaries ~ ' anniversar' ~ ('y' if st.anniversaries == 1 else 'ies')) if st.anniversaries else '',
+               (st.events ~ ' event' ~ ('' if st.events == 1 else 's')) if st.events else ''] | select | list %}
+          <span class="family-meta">{{ parts|join(' · ') if parts else 'No entries yet' }}</span>
+        </span>
+        <span class="family-next">
+          {% if info.next %}
+          <span class="muted-label">Next</span>
+          <span class="family-next-name">{{ info.next.name }}</span>
+          <span class="family-next-when">{{ info.next.occ.relative }}</span>
+          {% endif %}
+        </span>
+        <span class="family-status">
+          {% if cfg %}
+          <span class="status status-ok"><i></i>Synced calendar</span>
+          {% else %}
+          <span class="status status-off"><i></i>No calendar</span>
+          {% endif %}
+        </span>
+        <span class="family-chevron">{{ ui.icon('chevron-right') }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <header class="panel-head">
+      <h2>Next 30 days</h2>
+      <span class="panel-count">{{ soon|length }}</span>
+    </header>
+    {% if soon %}
+    <ol class="agenda">
+      {% for row in soon %}
+      {% include "partials/agenda_item.html" %}
+      {% endfor %}
+    </ol>
+    {% else %}
+    <div class="panel-empty">Nothing in the next 30 days.</div>
+    {% endif %}
+  </section>
+</div>
+{% else %}
+<div class="empty">
+  <div class="empty-icon">{{ ui.icon('users', 22) }}</div>
+  <h2>No families yet</h2>
+  <p>Create a family and link it to a Google Calendar to start tracking dates.</p>
+  <a class="btn btn-primary" href="{{ url_for('families.add_family') }}">{{ ui.icon('plus') }}New family</a>
+</div>
+{% endif %}
+{% endblock %}

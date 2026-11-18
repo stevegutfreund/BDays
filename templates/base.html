@@ -1,0 +1,71 @@
+{% import "_macros.html" as ui %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{% block title %}BDays{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    {% set ep = request.endpoint or '' %}
+    <header class="topbar">
+      <nav class="nav">
+        <a class="nav-brand" href="{{ url_for('families.index') }}">
+          <img src="{{ url_for('static', filename='favicon.svg') }}" alt="" width="28" height="28">
+          <span>BDays</span>
+        </a>
+        <div class="nav-links">
+          <a href="{{ url_for('families.index') }}"
+             class="{{ 'active' if ep.startswith('entries.') or ep in ('families.index', 'families.add_family') }}">
+            {{ ui.icon('users', 16) }}<span>Families</span></a>
+          <a href="{{ url_for('families.settings') }}"
+             class="{{ 'active' if ep.startswith('families.settings') }}">
+            {{ ui.icon('settings', 16) }}<span>Settings</span></a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="toasts" role="status" aria-live="polite">
+        {% for category, message in messages %}
+        <div class="toast toast-{{ category }}">
+          <span class="toast-icon">{{ ui.icon('check' if category == 'success' else ('alert' if category in ('error', 'warning') else 'info'), 16) }}</span>
+          <span class="toast-text">{{ message }}</span>
+          <button type="button" class="toast-close" aria-label="Dismiss" data-dismiss>{{ ui.icon('x', 14) }}</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <span>BDays</span><span aria-hidden="true">·</span><span>Birthdays &amp; anniversaries, Gregorian and Hebrew</span>
+    </footer>
+
+    <dialog class="confirm" id="confirm-dialog">
+      <form method="dialog">
+        <div class="confirm-icon">{{ ui.icon('alert', 20) }}</div>
+        <h2 class="confirm-title" id="confirm-title">Are you sure?</h2>
+        <p class="confirm-body" id="confirm-body"></p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" value="cancel">Cancel</button>
+          <button class="btn btn-danger" value="ok" id="confirm-ok">Confirm</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

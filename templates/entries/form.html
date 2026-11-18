@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% set is_edit = (action == 'edit') %}
+{% block title %}{{ 'Edit' if is_edit else 'Add' }} entry – {{ family|capitalize }} – BDays{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('families.index') }}">Families</a>{{ ui.icon('chevron-right', 14) }}<a href="{{ url_for('entries.list_entries', family=family) }}">{{ family|capitalize }}</a>{{ ui.icon('chevron-right', 14) }}<span>{{ 'Edit' if is_edit else 'New entry' }}</span>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1>{{ ('Edit ' ~ original_name) if is_edit else 'New entry' }}</h1>
+    <p class="page-sub">{{ 'Changes apply here only — push again to update the calendar.' if is_edit else 'Add a yearly date to the ' ~ (family|capitalize) ~ ' family.' }}</p>
+  </div>
+</div>
+
+{% set cur_type = entry.get('type', 'birthday') or 'birthday' %}
+{# a stored entry has a bool; a re-shown form has the posted string #}
+{% set cur_after = entry.get('afterShkia') in [true, '1'] %}
+
+<form class="form-panel" method="POST"
+      action="{{ url_for('entries.edit_entry', family=family, name=original_name) if is_edit else url_for('entries.add_entry', family=family) }}">
+
+  <section class="form-section">
+    <div class="form-section-head">
+      <h2>Details</h2>
+      <p>Who or what this date is for.</p>
+    </div>
+    <div class="form-section-body">
+      <div class="field">
+        <label class="field-label">Type</label>
+        <div class="choice-cards">
+          {% for value, label, icon_name, desc in [
+              ('birthday', 'Birthday', 'cake', 'One person'),
+              ('wedding anniversary', 'Anniversary', 'rings', 'A couple'),
+              ('event', 'Event', 'star', 'Anything yearly')] %}
+          <label class="choice-card">
+            <input type="radio" name="type" value="{{ value }}" {{ 'checked' if cur_type == value }} required>
+            <span class="choice-icon">{{ ui.icon(icon_name, 18) }}</span>
+            <span class="choice-text"><strong>{{ label }}</strong><small>{{ desc }}</small></span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="name">Name</label>
+        <input class="input" id="name" name="name" type="text" required autocomplete="off"
+               placeholder="e.g. Alice" value="{{ entry.get('name', '') }}">
+        <p class="field-help">For couples, join names with &amp; — e.g. Bob &amp; Carol.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="form-section-head">
+      <h2>Date</h2>
+      <p>The Hebrew date is worked out from this.</p>
+    </div>
+    <div class="form-section-body">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="date">Gregorian date</label>
+          <input class="input" id="date" name="date" type="date" required value="{{ entry.get('date', '') }}">
+        </div>
+        <div class="field">
+          <span class="field-label" id="shkia-label">Time of day</span>
+          <div class="segmented segmented-block" role="radiogroup" aria-labelledby="shkia-label">
+            <label class="seg"><input type="radio" name="afterShkia" value="0" {{ 'checked' if not cur_after }}>Before shkia</label>
+            <label class="seg"><input type="radio" name="afterShkia" value="1" {{ 'checked' if cur_after }}>After shkia</label>
+          </div>
+        </div>
+      </div>
+      <p class="field-help">After shkia moves the Hebrew date to the following day.</p>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="form-section-head">
+      <h2>Calendar colour</h2>
+      <p>Optional. Auto picks a colour from the type.</p>
+    </div>
+    <div class="form-section-body">
+      {{ ui.color_picker('color', entry.get('color', '')) }}
+    </div>
+  </section>
+
+  <div class="form-footer">
+    <a class="btn btn-secondary" href="{{ url_for('entries.list_entries', family=family) }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">{{ 'Save changes' if is_edit else 'Add entry' }}</button>
+  </div>
+</form>
+{% endblock %}

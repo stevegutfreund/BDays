@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}Settings – BDays{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Settings</h1>
+    <p class="page-sub">Which Google Calendar each family writes to.</p>
+  </div>
+</div>
+
+<section class="panel">
+  <header class="panel-head">
+    <h2>Calendar connections</h2>
+    <span class="panel-count">{{ cal_cfg|length }}</span>
+  </header>
+  {% if cal_cfg %}
+  <div class="table-wrap">
+    <table class="table table-settings">
+      <thead>
+        <tr><th>Family</th><th>Calendar ID</th><th>Colour</th><th class="actions-col"><span class="sr-only">Actions</span></th></tr>
+      </thead>
+      <tbody>
+        {% for c in cal_cfg %}
+        <tr>
+          <td class="cell-strong">{{ c.family|capitalize }}</td>
+          <td><code class="mono-chip" title="{{ c.calendar_id }}">{{ c.calendar_id }}</code></td>
+          <td>
+            {% if c.color %}
+            <span class="color-dot" style="--dot: {{ ui.color_hex(c.color) or '#94a3b8' }}"></span>{{ ui.color_name(c.color) or c.color }}
+            {% else %}<span class="muted">Default</span>{% endif %}
+          </td>
+          <td class="actions-col">
+            <a class="btn btn-secondary btn-sm" href="{{ calendar_url(c.family) }}" target="_blank" rel="noopener"
+               title="Open in Google Calendar">{{ ui.icon('calendar', 14) }}Open</a>
+            <button type="button" class="btn btn-secondary btn-sm" data-fill-mapping
+                    data-family="{{ c.family }}" data-calendar="{{ c.calendar_id }}" data-color="{{ c.color or '' }}">
+              {{ ui.icon('edit', 14) }}Edit</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="panel-empty">No calendars connected yet.</div>
+  {% endif %}
+</section>
+
+<form class="form-panel" id="mapping-form" method="POST" action="{{ url_for('families.update_calendar') }}">
+  <section class="form-section">
+    <div class="form-section-head">
+      <h2>Add or update a connection</h2>
+      <p>Saving an existing family name replaces its connection.</p>
+    </div>
+    <div class="form-section-body">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="family">Family</label>
+          <input class="input" id="family" name="family" type="text" required autocomplete="off" placeholder="e.g. smith">
+        </div>
+        <div class="field field-grow">
+          <label class="field-label" for="calendar_id">Calendar ID</label>
+          <input class="input mono" id="calendar_id" name="calendar_id" type="text" required autocomplete="off"
+                 placeholder="xxxxxxxx@group.calendar.google.com">
+        <small class="field-hint">In <a href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener">Google Calendar settings</a>,
+          open the calendar → <em>Integrate calendar</em> → <em>Calendar ID</em>. New calendar: <em>Other calendars → + → Create new calendar</em>.</small>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field-label">Event colour</span>
+        {{ ui.color_picker('color', '', 'Default') }}
+      </div>
+    </div>
+  </section>
+  <div class="form-footer">
+    <button class="btn btn-primary" type="submit">Save connection</button>
+  </div>
+</form>
+{% endblock %}

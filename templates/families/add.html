@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}New family – BDays{% endblock %}
+{% block content %}
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('families.index') }}">Families</a>{{ ui.icon('chevron-right', 14) }}<span>New family</span>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1>New family</h1>
+    <p class="page-sub">Each family syncs to its own Google Calendar.</p>
+  </div>
+</div>
+
+<form class="form-panel" method="POST">
+  <section class="form-section">
+    <div class="form-section-head">
+      <h2>Family</h2>
+      <p>Shown on the families list.</p>
+    </div>
+    <div class="form-section-body">
+      <div class="field">
+        <label class="field-label" for="name">Family name</label>
+        <input class="input" id="name" name="name" type="text" required autocomplete="off"
+               placeholder="e.g. Smith" value="{{ request.form.get('name', '') }}">
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="form-section-head">
+      <h2>Google Calendar</h2>
+      <p>Find the ID under the calendar's settings → Integrate calendar.</p>
+    </div>
+    <div class="form-section-body">
+      <div class="field">
+        <label class="field-label" for="calendar_id">Calendar ID</label>
+        <input class="input mono" id="calendar_id" name="calendar_id" type="text" required autocomplete="off"
+               placeholder="xxxxxxxx@group.calendar.google.com" value="{{ request.form.get('calendar_id', '') }}">
+        <small class="field-hint">In <a href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener">Google Calendar settings</a>,
+          open the calendar → <em>Integrate calendar</em> → <em>Calendar ID</em>. New calendar: <em>Other calendars → + → Create new calendar</em>.</small>
+      </div>
+      <div class="field">
+        <span class="field-label">Event colour</span>
+        {{ ui.color_picker('color', request.form.get('color', ''), 'Default') }}
+      </div>
+    </div>
+  </section>
+
+  <div class="form-footer">
+    <a class="btn btn-secondary" href="{{ url_for('families.index') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Create family</button>
+  </div>
+</form>
+{% endblock %}

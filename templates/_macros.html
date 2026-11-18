@@ -1,0 +1,78 @@
+{# Shared UI pieces: icons, avatars, type badges, Google colour picker. #}
+
+{% macro icon(name, size=16) -%}
+<svg class="icon" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{%- if name == 'plus' %}<path d="M12 5v14M5 12h14"/>
+{%- elif name == 'search' %}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+{%- elif name == 'edit' %}<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+{%- elif name == 'more' %}<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+{%- elif name == 'trash' %}<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>
+{%- elif name == 'upload' %}<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 21h14"/>
+{%- elif name == 'calendar' %}<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+{%- elif name == 'calendar-x' %}<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M10 14l4 4M14 14l-4 4"/>
+{%- elif name == 'chevron-down' %}<path d="m6 9 6 6 6-6"/>
+{%- elif name == 'chevron-right' %}<path d="m9 6 6 6-6 6"/>
+{%- elif name == 'arrow-left' %}<path d="M19 12H5M12 19l-7-7 7-7"/>
+{%- elif name == 'cake' %}<path d="M4 21V12a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9"/><path d="M4 16c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1"/><path d="M2 21h20M8 10V7M12 10V7M16 10V7"/>
+{%- elif name == 'rings' %}<circle cx="9" cy="14" r="6"/><circle cx="15" cy="14" r="6"/><path d="m10 4 2-2 2 2"/>
+{%- elif name == 'star' %}<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9Z"/>
+{%- elif name == 'users' %}<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>
+{%- elif name == 'clock' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+{%- elif name == 'link' %}<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>
+{%- elif name == 'settings' %}<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>
+{%- elif name == 'check' %}<path d="M20 6 9 17l-5-5"/>
+{%- elif name == 'alert' %}<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>
+{%- elif name == 'info' %}<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>
+{%- elif name == 'x' %}<path d="M18 6 6 18M6 6l12 12"/>
+{%- elif name == 'moon' %}<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+{%- elif name == 'sun' %}<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+{%- endif %}
+</svg>
+{%- endmacro %}
+
+{% set TYPE_META = {
+  'birthday':            {'label': 'Birthday',    'icon': 'cake',  'cls': 'birthday'},
+  'wedding anniversary': {'label': 'Anniversary', 'icon': 'rings', 'cls': 'anniversary'},
+  'event':               {'label': 'Event',       'icon': 'star',  'cls': 'event'},
+} %}
+
+{% macro type_badge(t) -%}
+{%- set m = TYPE_META.get(t, TYPE_META['birthday']) -%}
+<span class="type-badge type-{{ m.cls }}">{{ icon(m.icon, 12) }}{{ m.label }}</span>
+{%- endmacro %}
+
+{% macro avatar(entry, size='md') -%}
+{%- set m = TYPE_META.get(entry.type, TYPE_META['birthday']) -%}
+<span class="avatar avatar-{{ size }} avatar-{{ m.cls }}" aria-hidden="true">{{ entry.initials }}</span>
+{%- endmacro %}
+
+{% set GCAL_COLORS = [
+  ('1', 'Lavender',  '#7986cb'), ('2', 'Sage',      '#33b679'), ('3', 'Grape',     '#8e24aa'),
+  ('4', 'Flamingo',  '#e67c73'), ('5', 'Banana',    '#f6bf26'), ('6', 'Tangerine', '#f4511e'),
+  ('7', 'Peacock',   '#039be5'), ('8', 'Graphite',  '#616161'), ('9', 'Blueberry', '#3f51b5'),
+  ('10', 'Basil',    '#0b8043'), ('11', 'Tomato',   '#d50000'),
+] %}
+
+{% macro color_hex(id) -%}
+{%- for cid, cname, chex in GCAL_COLORS if cid == (id|string) %}{{ chex }}{% endfor -%}
+{%- endmacro %}
+
+{% macro color_name(id) -%}
+{%- for cid, cname, chex in GCAL_COLORS if cid == (id|string) %}{{ cname }}{% endfor -%}
+{%- endmacro %}
+
+{# Radio swatches for a Google Calendar colorId; empty value = automatic. #}
+{% macro color_picker(name, value, auto_label='Auto') -%}
+<div class="swatches" role="radiogroup">
+  <label class="swatch swatch-auto" title="{{ auto_label }}">
+    <input type="radio" name="{{ name }}" value="" {{ 'checked' if not value }}>
+    <span>{{ auto_label }}</span>
+  </label>
+  {% for cid, cname, chex in GCAL_COLORS %}
+  <label class="swatch" title="{{ cname }} ({{ cid }})" style="--swatch: {{ chex }}">
+    <input type="radio" name="{{ name }}" value="{{ cid }}" {{ 'checked' if (value|string) == cid }} aria-label="{{ cname }}">
+    <span></span>
+  </label>
+  {% endfor %}
+</div>
+{%- endmacro %}

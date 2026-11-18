@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}{{ family|capitalize }} – BDays{% endblock %}
+{% block content %}
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('families.index') }}">Families</a>{{ ui.icon('chevron-right', 14) }}<span>{{ family|capitalize }}</span>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1>{{ family|capitalize }}</h1>
+    <p class="page-sub">{{ stats.total }} entr{{ 'y' if stats.total == 1 else 'ies' }} · synced to Google Calendar in both Gregorian and Hebrew dates</p>
+  </div>
+  <div class="page-actions">
+    {% set cal_link = calendar_url(family) %}
+    {% if cal_link %}
+    <a class="btn btn-secondary" href="{{ cal_link }}" target="_blank" rel="noopener"
+       title="Open the {{ family|capitalize }} calendar in Google Calendar">{{ ui.icon('calendar') }}Open calendar</a>
+    {% endif %}
+    {% if entries %}
+    <details class="menu">
+      <summary class="btn btn-secondary">{{ ui.icon('upload') }}Sync{{ ui.icon('chevron-down', 14) }}</summary>
+      <div class="menu-pop menu-right">
+        <form method="POST" action="{{ url_for('calendar.push_all', family=family) }}"
+              data-confirm="Push all {{ entries|length }} entries to the {{ family|capitalize }} Google Calendar? Existing events aren't removed first, so anything already there will be duplicated."
+              data-confirm-title="Push all entries" data-confirm-ok="Push all" data-confirm-tone="primary">
+          <button type="submit" class="menu-item">{{ ui.icon('upload') }}<span>Push all entries<small>Write every entry's events</small></span></button>
+        </form>
+        <div class="menu-sep"></div>
+        <form method="POST" action="{{ url_for('calendar.clear_all', family=family) }}"
+              data-confirm="This deletes every event in the {{ family|capitalize }} calendar. Your entries here are kept."
+              data-confirm-title="Clear calendar" data-confirm-ok="Clear calendar">
+          <button type="submit" class="menu-item danger">{{ ui.icon('calendar-x') }}<span>Clear calendar<small>Delete all events</small></span></button>
+        </form>
+      </div>
+    </details>
+    {% endif %}
+    <a class="btn btn-primary" href="{{ url_for('entries.add_entry', family=family) }}">{{ ui.icon('plus') }}Add entry</a>
+  </div>
+</div>
+
+{% if entries %}
+<div class="stats">
+  <div class="stat"><span class="stat-label">Total</span><span class="stat-value">{{ stats.total }}</span></div>
+  <div class="stat"><span class="stat-label">{{ ui.icon('cake', 14) }}Birthdays</span><span class="stat-value">{{ stats.birthdays }}</span></div>
+  <div class="stat"><span class="stat-label">{{ ui.icon('rings', 14) }}Anniversaries</span><span class="stat-value">{{ stats.anniversaries }}</span></div>
+  <div class="stat stat-accent"><span class="stat-label">{{ ui.icon('clock', 14) }}Next 30 days</span><span class="stat-value">{{ stats.next_30 }}</span></div>
+</div>
+
+{% if soon %}
+<section class="panel">
+  <header class="panel-head">
+    <h2>Coming up</h2>
+    <span class="panel-hint">Gregorian and Hebrew dates are separate calendar events</span>
+  </header>
+  <ol class="agenda agenda-grid">
+    {% set show_family = false %}
+    {% for row in soon %}
+    {% include "partials/agenda_item.html" %}
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<section class="panel">
+  <header class="panel-head panel-head-tools">
+    <div class="segmented" role="tablist" id="entry-type-filter">
+      <button type="button" class="seg active" data-type="">All <span>{{ stats.total }}</span></button>
+      <button type="button" class="seg" data-type="birthday">Birthdays <span>{{ stats.birthdays }}</span></button>
+      <button type="button" class="seg" data-type="wedding anniversary">Anniversaries <span>{{ stats.anniversaries }}</span></button>
+      {% if stats.events %}<button type="button" class="seg" data-type="event">Events <span>{{ stats.events }}</span></button>{% endif %}
+    </div>
+    <div class="tools">
+      <label class="search">
+        {{ ui.icon('search') }}
+        <input type="search" id="entry-search" placeholder="Search…" autocomplete="off" aria-label="Search entries">
+      </label>
+      <label class="select">
+        <select id="entry-sort" aria-label="Sort">
+          <option value="upcoming">Upcoming first</option>
+          <option value="date">Date</option>
+          <option value="name">Name</option>
+          <option value="age-asc">Youngest first</option>
+          <option value="age-desc">Oldest first</option>
+        </select>
+        {{ ui.icon('chevron-down', 14) }}
+      </label>
+    </div>
+  </header>
+
+  <div class="table-wrap">
+    <table class="table" id="entry-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Hebrew date</th>
+          <th class="num">Age</th>
+          <th>Next</th>
+          <th class="actions-col"><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        {% set search_blob = [entry.name, entry.type, entry.date_display, entry.hebrew_date, entry.age] | join(' ') | lower %}
+        <tr data-type="{{ entry.type }}" data-age="{{ entry.age if entry.age is not none else '' }}"
+            data-date="{{ entry.date }}" data-name="{{ entry.name|lower }}"
+            data-days="{{ entry.days_until if entry.days_until is not none else 9999 }}"
+            data-search="{{ search_blob }}">
+          <td class="cell-person"><div class="person-wrap">
+            {{ ui.avatar(entry) }}
+            <span class="person">
+              <a class="person-name" href="{{ url_for('entries.edit_entry', family=family, name=entry.name) }}">{{ entry.name }}</a>
+              {{ ui.type_badge(entry.type) }}
+            </span>
+          </div></td>
+          <td class="cell-date">
+            <span class="tnum">{{ entry.date_display }}</span>
+            {% if entry.afterShkia %}<span class="tag" title="After shkia — Hebrew date is the following day">After shkia</span>{% endif %}
+            <span class="mobile-only">{% if entry.hebrew_date %} · {{ entry.hebrew_date }}{% endif %}{% if entry.age is not none %} · Age {{ entry.age }}{% endif %}</span>
+          </td>
+          <td class="cell-hebrew">{{ entry.hebrew_date or '—' }}</td>
+          <td class="num tnum cell-age">{{ entry.age if entry.age is not none else '—' }}</td>
+          <td class="cell-next">
+            {% if entry.next %}
+            <span class="next{{ ' next-soon' if entry.next.days <= 7 }}">{{ entry.next.relative }}</span>
+            <span class="next-sub">{{ entry.next.display }} · {{ 'Hebrew' if entry.next.kind == 'heb' else 'Gregorian' }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="actions-col">
+            <div class="row-actions">
+              <a class="icon-btn" href="{{ url_for('entries.edit_entry', family=family, name=entry.name) }}" title="Edit" aria-label="Edit {{ entry.name }}">{{ ui.icon('edit') }}</a>
+              <details class="menu">
+                <summary class="icon-btn" title="More" aria-label="More actions for {{ entry.name }}">{{ ui.icon('more') }}</summary>
+                <div class="menu-pop menu-right">
+                  <form method="POST" action="{{ url_for('calendar.push_entry', family=family, name=entry.name) }}"
+                        data-confirm="Write yearly Gregorian and Hebrew events for {{ entry.name }}. If they're already on the calendar this creates duplicates, so remove them first."
+                        data-confirm-title="Push to calendar" data-confirm-ok="Push" data-confirm-tone="primary">
+                    <button type="submit" class="menu-item">{{ ui.icon('upload') }}<span>Push to calendar</span></button>
+                  </form>
+                  <form method="POST" action="{{ url_for('calendar.clear_entry', family=family, name=entry.name) }}"
+                        data-confirm="Remove all calendar events for {{ entry.name }}? The entry itself is kept."
+                        data-confirm-title="Remove from calendar" data-confirm-ok="Remove events">
+                    <button type="submit" class="menu-item">{{ ui.icon('calendar-x') }}<span>Remove from calendar</span></button>
+                  </form>
+                  <div class="menu-sep"></div>
+                  <form method="POST" action="{{ url_for('entries.delete_entry', family=family, name=entry.name) }}"
+                        data-confirm="Delete {{ entry.name }}? This can't be undone. Calendar events are not removed automatically."
+                        data-confirm-title="Delete entry" data-confirm-ok="Delete">
+                    <button type="submit" class="menu-item danger">{{ ui.icon('trash') }}<span>Delete entry</span></button>
+                  </form>
+                </div>
+              </details>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="panel-empty" id="entry-no-results" hidden>No entries match your search.</div>
+  <footer class="panel-foot"><span id="entry-count"></span></footer>
+</section>
+{% else %}
+<div class="empty">
+  <div class="empty-icon">{{ ui.icon('cake', 22) }}</div>
+  <h2>No entries yet</h2>
+  <p>Add birthdays, anniversaries and other yearly dates for the {{ family|capitalize }} family.</p>
+  <a class="btn btn-primary" href="{{ url_for('entries.add_entry', family=family) }}">{{ ui.icon('plus') }}Add entry</a>
+</div>
+{% endif %}
+{% endblock %}
